@@ -1,0 +1,193 @@
+{
+    "scopeName": "source.log",
+    "patterns": [
+        {
+            "name": "meta.eac.version-line",
+            "begin": "^Exact Audio Copy (V\\d+\\.\\d+) from (\\d{1,2}\\.\\s*\\w+\\s*\\d{4})",
+            "beginCaptures": {
+                "1": { "name": "constant.numeric.version-number" },
+                "2": { "name": "constant.numeric.date" }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.logfile-line",
+            "begin": "^EAC extraction logfile from (\\d{1,2}\\.\\s*\\w+\\s*\\d{4}), (\\d{1,2}:\\d{2})",
+            "beginCaptures": {
+                "1": { "name": "constant.numeric.date" },
+                "2": { "name": "constant.numeric.time" }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.read-mode-line",
+            "begin": "^(Read mode\\s+:\\s+)(\\w+)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bSecure\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.accurate-stream-line",
+            "begin": "^(Utilize accurate stream\\s+:\\s+)(Yes|No)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bYes\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.audio-cache-line",
+            "begin": "^(Defeat audio cache\\s+:\\s+)(Yes|No)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bYes\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.C2-line",
+            "begin": "^(Make use of C2 pointers\\s+:\\s+)(Yes|No)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bNo\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.fill-with-silence-line",
+            "begin": "^(Fill up missing offset samples with silence\\s+:\\s+)(Yes|No)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bYes\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.delete-trailing-blocks-line",
+            "begin": "^(Delete leading and trailing silent blocks\\s+:\\s+)(Yes|No)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bNo\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.calc-with-null-sample-line",
+            "begin": "^(Null samples used in CRC calculations\\s+:\\s+)(Yes|No)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bYes\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        },
+        {
+            "name": "meta.eac.calc-with-null-sample-line",
+            "begin": "^(Gap handling\\s+:\\s+)(.+)",
+            "beginCaptures": {
+                "1": { "name": "variable.function" },
+                "2": {
+                    "patterns": [
+                        {
+                            "match": "\\bAppended to previous track\\b",
+                            "name": "markup.inserted.diff"
+                        },
+                        {
+                            "match": "\\b.+\\b",
+                            "name": "markup.deleted.diff"
+                        }
+                    ]
+                }
+            },
+            "end": "$",
+            "patterns": [ ]
+        }
+    ]
+}
