@@ -9,6 +9,7 @@
     "categories": [
         "Other"
     ],
+    "publisher": "nullpinter",
     "activationEvents": [],
     "main": "./out/extension.js",
     "contributes": {
