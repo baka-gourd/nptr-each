@@ -25,11 +25,53 @@
                 "configuration": "./language-configuration.json"
             }
         ],
-        "grammars": [
+        "semanticTokenTypes": [
+            {
+                "id": "validChecksum",
+                "description": "Highlight valid checksum",
+                "superType": "markup"
+            },
+            {
+                "id": "invalidChecksum",
+                "description": "Highlight invalid checksum",
+                "superType": "markup"
+            },
+            {
+                "id": "feature",
+                "description": "EAC feature",
+                "superType": "markup"
+            },
+            {
+                "id": "feature-value",
+                "description": "EAC feature",
+                "superType": "markup"
+            },
+            {
+                "id": "feature-value-hint",
+                "description": "EAC feature",
+                "superType": "markup"
+            }
+        ],
+        "semanticTokenScopes": [
             {
                 "language": "eac-log",
-                "scopeName": "source.log",
-                "path": "./syntaxes/eac-log.tmLanguage.json"
+                "scopes": {
+                    "invalidChecksum": [
+                        "markup.deleted.diff"
+                    ],
+                    "validChecksum": [
+                        "markup.inserted.diff"
+                    ],
+                    "feature": [
+                        "variable.function"
+                    ],
+                    "feature-value": [
+                        "variable.other.constant"
+                    ],
+                    "feature-value-hint": [
+                        "variable.other.readwrite"
+                    ]
+                }
             }
         ]
     },

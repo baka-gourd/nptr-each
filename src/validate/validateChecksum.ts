@@ -9,74 +9,82 @@ interface CheckData {
     oldChecksum?: string;
 }
 
+interface CheckResult {
+    message: "invalid" | "passed" | "failed";
+    start?: number;
+    end?: number;
+    expected?: string;
+    calculated?: string;
+}
+
 export const validateChecksum = (
     document: vscode.TextDocument,
     collection: vscode.DiagnosticCollection
-): boolean => {
+) => {
+    const res = checkChecksum(document);
+    if (res.message === "failed") {
+        const diagnostic = new vscode.Diagnostic(
+            new vscode.Range(
+                document.positionAt(res.start!),
+                document.positionAt(res.end!)
+            ),
+            `Checksum: expected '${res.expected}', calculated '${res.calculated}'.`,
+            vscode.DiagnosticSeverity.Error
+        );
+        collection.set(document.uri, [
+            ...(collection.get(document.uri) || []),
+            diagnostic,
+        ]);
+    } else if (res.message === "invalid") {
+        const diagnostic = new vscode.Diagnostic(
+            new vscode.Range(
+                new vscode.Position(0, 0),
+                new vscode.Position(0, 100)
+            ),
+            `Checksum: missing or invalid.`,
+            vscode.DiagnosticSeverity.Error
+        );
+        collection.set(document.uri, [
+            ...(collection.get(document.uri) || []),
+            diagnostic,
+        ]);
+    }
+};
+
+export const checkChecksum = (document: vscode.TextDocument): CheckResult => {
     const file = document.getText();
-    const match = file.match(/==== (.+)? ([0-9A-Z]{64}) ====/);
+    const match = file.match(/==== (.+)? (?<check>[0-9A-Z]{64}) ====/);
     let checkData: CheckData = {
         unsignedText: undefined,
         oldChecksum: undefined,
     };
     if (!match) {
-        const diagnostic = new vscode.Diagnostic(
-            new vscode.Range(
-                new vscode.Position(0, 0),
-                new vscode.Position(0, file.length > 100 ? 100 : file.length)
-            ),
-            `Checksum: missing or invalid in the file.`,
-            vscode.DiagnosticSeverity.Error
-        );
-        collection.set(document.uri, [
-            ...(collection.get(document.uri) || []),
-            diagnostic,
-        ]);
-        return false;
+        return {
+            message: "invalid",
+        };
     }
 
-    const matched = file.replaceAll(/==== (.+)? ([0-9A-Z]{64}) ====/g, "");
+    const matched = file.replace(/==== (.+)? ([0-9A-Z]{64}) ====/g, "");
     checkData.unsignedText = matched;
-    checkData.oldChecksum = match[2];
+    checkData.oldChecksum = match.groups!["check"];
 
     if (
         checkData.oldChecksum === undefined ||
         checkData.unsignedText === undefined
     ) {
-        const diagnostic = new vscode.Diagnostic(
-            new vscode.Range(
-                new vscode.Position(0, 0),
-                new vscode.Position(0, file.length > 100 ? 100 : file.length)
-            ),
-            `Checksum: missing or invalid in the file.`,
-            vscode.DiagnosticSeverity.Error
-        );
-        collection.set(document.uri, [
-            ...(collection.get(document.uri) || []),
-            diagnostic,
-        ]);
-        return false;
+        return { message: "invalid" };
     } else {
-        const calculated = checksum(file);
+        const calculated = checksum(checkData.unsignedText);
         if (calculated === checkData.oldChecksum) {
-            return true;
+            return { message: "passed" };
         } else {
-            // Add checksum mismatch error
-            const diagnostic = new vscode.Diagnostic(
-                new vscode.Range(
-                    document.positionAt(file.indexOf(match[0])),
-                    document.positionAt(
-                        file.indexOf(match[0]) + match[0].length
-                    )
-                ),
-                `Checksum: expected '${checkData.oldChecksum}', calculated '${calculated}'.`,
-                vscode.DiagnosticSeverity.Error
-            );
-            collection.set(document.uri, [
-                ...(collection.get(document.uri) || []),
-                diagnostic,
-            ]);
-            return false;
+            return {
+                message: "failed",
+                calculated: calculated,
+                expected: checkData.oldChecksum,
+                start: file.indexOf(match[0]),
+                end: file.indexOf(match[0]) + match[0].length,
+            };
         }
     }
 };
@@ -89,7 +97,7 @@ const bufferToHex = (buffer: any) => {
 
 const checksum = (text: string): string => {
     // Ignore newlines
-    text = text.replaceAll(/\r/g, "").replaceAll(/\n/g, "");
+    text = text.replace(/\r\n/g, "").replace(/\n/g, "");
 
     // Fuzzing reveals BOMs are also ignored
     text = text.replaceAll("\ufeff", "").replaceAll("\ufffe", "");

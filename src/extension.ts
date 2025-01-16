@@ -2,14 +2,29 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { validateDocument } from "./validate/validateOptions";
+import { createLegend, getSemanticProvider } from "./semanticHelper";
 import { validateChecksum } from "./validate/validateChecksum";
+import { SettingsInlayHintsProvider } from "./inlayHintHelper";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-    // Create a diagnostic collection for managing errors
     const diagnosticCollection =
         vscode.languages.createDiagnosticCollection("eac-logs");
+    const legend = createLegend([
+        "validChecksum",
+        "invalidChecksum",
+        "feature",
+        "feature-value",
+        "feature-value-hint",
+    ]);
+    const semanticProvider: vscode.DocumentSemanticTokensProvider = {
+        provideDocumentSemanticTokens(document, token) {
+            return getSemanticProvider(document, legend);
+        },
+    };
+
+    const inlayProvider = new SettingsInlayHintsProvider();
 
     const validate = (document: vscode.TextDocument) => {
         const firstLine = document.lineAt(0).text;
@@ -41,6 +56,19 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(diagnosticCollection);
+    context.subscriptions.push(
+        vscode.languages.registerDocumentSemanticTokensProvider(
+            { language: "eac-log" },
+            semanticProvider,
+            legend
+        )
+    );
+    context.subscriptions.push(
+        vscode.languages.registerInlayHintsProvider(
+            { language: "eac-log" }, // Match files
+            inlayProvider
+        )
+    );
 }
 
 // This method is called when your extension is deactivated
