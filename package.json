@@ -9,6 +9,7 @@
     "categories": [
         "Other"
     ],
+    "repository": "https://github.com/baka-gourd/nptr-each",
     "publisher": "nullpinter",
     "activationEvents": [],
     "main": "./out/extension.js",
@@ -77,22 +78,26 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "pnpm run compile",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "pretest": "pnpm run compile && pnpm run lint",
         "lint": "eslint src",
-        "test": "vscode-test"
+        "test": "vscode-test",
+        "vscode:prepublish": "npm run esbuild-base -- --minify",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "package": "pnpm vsce package --no-dependencies",
+        "publish": "pnpm vsce publish --no-dependencies"
     },
     "devDependencies": {
-        "@types/vscode": "^1.96.0",
         "@types/mocha": "^10.0.10",
         "@types/node": "20.x",
+        "@types/vscode": "^1.96.0",
         "@typescript-eslint/eslint-plugin": "^8.17.0",
         "@typescript-eslint/parser": "^8.17.0",
-        "eslint": "^9.16.0",
-        "typescript": "^5.7.2",
         "@vscode/test-cli": "^0.0.10",
-        "@vscode/test-electron": "^2.4.1"
+        "@vscode/test-electron": "^2.4.1",
+        "esbuild": "^0.24.2",
+        "eslint": "^9.16.0",
+        "typescript": "^5.7.2"
     }
 }
