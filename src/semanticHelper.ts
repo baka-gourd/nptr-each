@@ -172,6 +172,16 @@ const trackBuilder = (
             continue;
         }
 
+        if (line === "No tracks could be verified as accurate") {
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, 0),
+                    document.lineAt(i).range.end
+                ),
+                "invalidChecksum"
+            );
+            continue;
+        }
         if (line === "End of status report") {
             break;
         }
