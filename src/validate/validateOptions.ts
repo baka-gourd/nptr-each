@@ -45,7 +45,7 @@ export const validateDocument = (
                     new vscode.Diagnostic(
                         range,
                         `Invalid value '${settingValue}' for setting '${settingName}'.`,
-                        vscode.DiagnosticSeverity.Error
+                        vscode.DiagnosticSeverity.Warning
                     )
                 );
                 reportedErrors.add(settingName); // Mark this setting as reported
