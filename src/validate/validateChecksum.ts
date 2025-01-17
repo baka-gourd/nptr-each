@@ -28,7 +28,7 @@ export const validateChecksum = (
                 document.positionAt(res.start!),
                 document.positionAt(res.end!)
             ),
-            `Checksum: expected '${res.expected}', calculated '${res.calculated}'.`,
+            `Checksum: expected '${res.expected}'.`,
             vscode.DiagnosticSeverity.Error
         );
         collection.set(document.uri, [
