@@ -2,7 +2,7 @@
     "name": "nptr-each",
     "displayName": "Exact Audio Copy Log Highlighter",
     "description": "highlight EAC log file",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "engines": {
         "vscode": "^1.96.0"
     },
@@ -72,6 +72,9 @@
                     ],
                     "feature-value-hint": [
                         "variable.other.readwrite"
+                    ],
+                    "track-info": [
+                        "keyword.operator.relational"
                     ]
                 }
             }

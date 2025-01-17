@@ -172,7 +172,10 @@ const trackBuilder = (
             continue;
         }
 
-        if (line === "No tracks could be verified as accurate") {
+        if (
+            line === "No tracks could be verified as accurate" ||
+            line === "Some tracks could not be verified as accurate"
+        ) {
             builder.push(
                 new vscode.Range(
                     new vscode.Position(i, 0),
@@ -226,11 +229,18 @@ const trackBuilder = (
         }
 
         // Handle filenames
-        const filenameMatch = line.match(/^\s*Filename\s+(.+\.wav)$/);
+        const filenameMatch = line.match(/^\s*(Filename)\s+(.+\.wav)$/);
         if (filenameMatch) {
             builder.push(
                 new vscode.Range(
                     new vscode.Position(i, line.indexOf(filenameMatch[1])),
+                    new vscode.Position(i, line.indexOf(filenameMatch[1]) + 8)
+                ),
+                "track-info"
+            );
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, line.indexOf(filenameMatch[2])),
                     new vscode.Position(i, line.length)
                 ),
                 "feature-value"
@@ -241,6 +251,7 @@ const trackBuilder = (
         const crcMatch = line.match(/^\s*(Test|Copy) CRC\s+([A-F0-9]+)$/);
         if (crcMatch) {
             const [_, crcType, crcValue] = crcMatch;
+            const typeStart = line.indexOf(crcType);
             const start = line.indexOf(crcValue);
 
             if (crcType === "Test") {
@@ -248,6 +259,14 @@ const trackBuilder = (
             } else if (crcType === "Copy") {
                 currentTrackCopyCRC = crcValue;
             }
+
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, typeStart),
+                    new vscode.Position(i, typeStart + 8)
+                ),
+                "track-info"
+            );
         }
 
         // Handle status messages
@@ -259,6 +278,17 @@ const trackBuilder = (
                     new vscode.Position(i, line.length)
                 ),
                 "feature"
+            );
+        }
+
+        if (line.match(/Cannot be verified as accurate.+/)) {
+            const start = line.indexOf(line.trim());
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, start),
+                    new vscode.Position(i, line.length)
+                ),
+                "invalidChecksum"
             );
         }
     }
@@ -360,10 +390,10 @@ const ctdbStatusBuilder = (
 
         // Parse track status lines
         const statusMatch = line.match(
-            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Accurately ripped)/
+            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Accurately ripped)(.*)?/
         );
         if (statusMatch) {
-            const [_, trackNum, matches, total, status] = statusMatch;
+            const [_, trackNum, matches, total, status, extra] = statusMatch;
 
             // Mark track number
             const trackStart = line.indexOf(trackNum);
@@ -395,11 +425,24 @@ const ctdbStatusBuilder = (
                 ),
                 "feature"
             );
+
+            if (extra) {
+                builder.push(
+                    new vscode.Range(
+                        new vscode.Position(i, statusStart + status.length + 1),
+                        new vscode.Position(
+                            i,
+                            statusStart + status.length + 1 + extra.length
+                        )
+                    ),
+                    "feature-value"
+                );
+            }
         }
 
         // Optional: Handle non-accurate rips or other statuses
         const nonAccurateMatch = line.match(
-            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Not accurately ripped)/
+            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Differs in.+)/
         );
         if (nonAccurateMatch) {
             const [_, trackNum, matches, total, status] = nonAccurateMatch;

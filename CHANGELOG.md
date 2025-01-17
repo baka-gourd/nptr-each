@@ -1,9 +1,6 @@
 # Change Log
 
-All notable changes to the "nptr-each" extension will be documented in this file.
+## 0.0.4
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+- Add codelens to hint accuraterip
+- Highlight tracks and accuraterip
