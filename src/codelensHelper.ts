@@ -34,8 +34,14 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
 
 const getDetail = (document: vscode.TextDocument): string => {
     const totalLines = document.lineCount;
+    const text = document.getText();
     let isProcessingTracks = false;
-
+    if (
+        text.indexOf("Suspicious position") !== -1 ||
+        text.indexOf("Copy finished") !== -1
+    ) {
+        return "Suspicious! Maybe not accurate";
+    }
     for (let i = 0; i < totalLines; i++) {
         const line = document.lineAt(i).text;
 
@@ -56,7 +62,7 @@ const getDetail = (document: vscode.TextDocument): string => {
 
         // Parse track status lines
         const statusMatch = line.match(
-            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Accurately ripped)/
+            /^\s*(\d+)\s*\|\s*\(([ \d]+)\/([ \d]+)\)\s*(Accurately ripped)/
         );
         if (statusMatch) {
             continue;
@@ -64,9 +70,12 @@ const getDetail = (document: vscode.TextDocument): string => {
 
         // Optional: Handle non-accurate rips or other statuses
         const nonAccurateMatch = line.match(
-            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Differs in.+)/
+            /^\s*(\d+)\s*\|\s*\(([ \d]+)\/([ \d]+)\)\s*(Differs in.+)/
         );
-        if (nonAccurateMatch) {
+        const noMatchMatch = line.match(
+            /^\s*(\d+)\s*\|\s*\(([ \d]+)\/([ \d]+)\)\s*(No match)/
+        );
+        if (nonAccurateMatch || noMatchMatch) {
             return "Not accurately ripped";
         }
     }

@@ -281,6 +281,28 @@ const trackBuilder = (
             );
         }
 
+        if (line.match(/(Suspicious position).+/)) {
+            const start = line.indexOf(line.trim());
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, start),
+                    new vscode.Position(i, line.length)
+                ),
+                "invalidChecksum"
+            );
+        }
+
+        if (line.match(/(Copy finished)/)) {
+            const start = line.indexOf(line.trim());
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, start),
+                    new vscode.Position(i, line.length)
+                ),
+                "invalidChecksum"
+            );
+        }
+
         if (line.match(/Cannot be verified as accurate.+/)) {
             const start = line.indexOf(line.trim());
             builder.push(
@@ -390,7 +412,7 @@ const ctdbStatusBuilder = (
 
         // Parse track status lines
         const statusMatch = line.match(
-            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Accurately ripped)(.*)?/
+            /^\s*(\d+)\s*\|\s*\(([ \d]+)\/([ \d]+)\)\s*(Accurately ripped)(.*)?/
         );
         if (statusMatch) {
             const [_, trackNum, matches, total, status, extra] = statusMatch;
@@ -442,10 +464,48 @@ const ctdbStatusBuilder = (
 
         // Optional: Handle non-accurate rips or other statuses
         const nonAccurateMatch = line.match(
-            /^\s*(\d+)\s*\|\s*\((\d+)\/(\d+)\)\s*(Differs in.+)/
+            /^\s*(\d+)\s*\|\s*\(([ \d]+)\/([ \d]+)\)\s*(Differs in.+)/
         );
         if (nonAccurateMatch) {
             const [_, trackNum, matches, total, status] = nonAccurateMatch;
+
+            // Mark track number
+            const trackStart = line.indexOf(trackNum);
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, trackStart),
+                    new vscode.Position(i, trackStart + trackNum.length)
+                ),
+                "feature-value"
+            );
+
+            // Mark matches ratio with warning
+            const ratioText = `(${matches}/${total})`;
+            const ratioStart = line.indexOf(ratioText);
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, ratioStart),
+                    new vscode.Position(i, ratioStart + ratioText.length)
+                ),
+                "invalidChecksum"
+            );
+
+            // Mark status text
+            const statusStart = line.indexOf(status);
+            builder.push(
+                new vscode.Range(
+                    new vscode.Position(i, statusStart),
+                    new vscode.Position(i, statusStart + status.length)
+                ),
+                "invalidChecksum"
+            );
+        }
+
+        const noMatchMatch = line.match(
+            /^\s*(\d+)\s*\|\s*\(([ \d]+)\/([ \d]+)\)\s*(No match)/
+        );
+        if (noMatchMatch) {
+            const [_, trackNum, matches, total, status] = noMatchMatch;
 
             // Mark track number
             const trackStart = line.indexOf(trackNum);
